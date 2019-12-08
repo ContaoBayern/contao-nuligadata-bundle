@@ -9,3 +9,24 @@ $GLOBALS['TL_LANG']['tl_team']['new'] = [
     'Neues Team',
     'Ein neues Team anlegen'
 ];
+
+$GLOBALS['TL_LANG']['tl_team']['nu_id'] = [
+    'ID des Teams',
+];
+
+$GLOBALS['TL_LANG']['tl_team']['nu_name'] = [
+    'Datensatzbezeichnung',
+    'HS Bin nicht sicher, welche Daten wir hier holen. Könnte hier nicht auch nu_team ausgegeben werden?'   //FIXME
+];
+
+$GLOBALS['TL_LANG']['tl_team']['nu_team'] = [
+    'Teambezeichnung',
+];
+
+$GLOBALS['TL_LANG']['tl_team']['nu_group'] = [
+    'Liga bzw. Staffel',
+];
+
+$GLOBALS['TL_LANG']['tl_team']['nu_season'] = [
+    'Saison',
+];

@@ -1,0 +1,46 @@
+{
+  "name": "contaobayern/contao-nuligadata-bundle",
+  "type": "contao-bundle",
+  "description": "Contao 4 Bundle: Daten aus NuLiga API",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Andreas Fieger",
+      "email": "dev@andreas-fieger.de",
+      "role": "Developer"
+    },
+    {
+      "name": "Hella Schuster",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "ext-json": "*",
+    "contao/core-bundle": "^4.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "ContaoBayern\\NuligadataBundle\\": "src/"
+    },
+    "classmap": [
+      "src/Resources/contao"
+    ],
+    "exclude-from-classmap": [
+      "src/Resources/contao/assets",
+      "src/Resources/contao/config",
+      "src/Resources/contao/dca",
+      "src/Resources/contao/languages",
+      "src/Resources/contao/templates"
+    ]
+  },
+  "extra": {
+    "contao-manager-plugin": "ContaoBayern\\NuligadataBundle\\ContaoManager\\Plugin",
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.13"
+  }
+}

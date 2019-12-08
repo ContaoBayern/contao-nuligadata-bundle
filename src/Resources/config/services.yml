@@ -1,0 +1,9 @@
+services:
+
+    app.test.command:
+        class: ContaoBayern\NuligadataBundle\Command\TestCommand
+        public: true
+        tags: ['console.command']
+        calls:
+          - ["setFramework", ["@contao.framework"]]
+          - ["setContainer", ["@service_container"]]

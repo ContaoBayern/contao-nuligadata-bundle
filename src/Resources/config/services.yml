@@ -7,3 +7,9 @@ services:
         calls:
           - ["setFramework", ["@contao.framework"]]
           - ["setContainer", ["@service_container"]]
+
+    nuliga.authenticated.request:
+        class: ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest
+        arguments:
+            - '@service_container'
+        public: true

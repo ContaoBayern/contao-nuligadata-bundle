@@ -1,7 +1,7 @@
 <?php
 
 $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default']
-    .= ';{nuLiga_legend},team,roundName,homeaway,courtHallName,teamHome,teamGuest,matchesHome,matchesGuest,meetingUuid';
+    .= ';{nuLiga_legend},team,roundName,homeaway,courtHallName,teamHome,teamGuest,matchesHome,matchesGuest,meetingUuid,tstamp';
 
 // TODO: das 'team' sollte eigentlich ein Attribut des tl_calendar sein (-> pid dieses tl_calendar_events)
 
@@ -41,4 +41,7 @@ foreach ([
     ];
 }
 
-// $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['teamHome']['eval']['tl_class'] .= ' clr';
+// Show the time stamp (which is the date when we last fetched data)
+$GLOBALS['TL_DCA']['tl_calendar_events']['fields']['tstamp']['label'] = &$GLOBALS['TL_LANG']['tl_calendar_events']['tstamp'];
+$GLOBALS['TL_DCA']['tl_calendar_events']['fields']['tstamp']['eval'] = ['rgxp' => 'datim', 'readonly'=>true, 'tl_class' => 'w50'];
+$GLOBALS['TL_DCA']['tl_calendar_events']['fields']['tstamp']['inputType'] = 'text';

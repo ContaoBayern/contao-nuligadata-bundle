@@ -20,12 +20,15 @@ $GLOBALS['TL_DCA']['tl_team'] = [
             'panelLayout' => 'filter;search,limit',
         ],
         'label'             => [
+            'fields'         => ['name'],
+            'label'          => '%s',
             'label_callback' => function(array $row) {
                 $calendarLabel = '<span class="tl_red">nicht gesetzt</span>';
-                if ($row['calendar'])
+                if ($row['calendar'] > 0) {
                     $cal = CalendarModel::findById($row['calendar']);
-                if ($cal) {
-                    $calendarLabel = $cal->title;
+                    if ($cal) {
+                        $calendarLabel = $cal->title;
+                    }
                 }
                 return sprintf("<span class='tl_blue'>%s</span>, Saison: %s, Kalender: %s <code class='tl_gray'>(id: %d, group: %d)</code>",
                     $row['name'],

@@ -94,7 +94,7 @@ $GLOBALS['TL_DCA']['tl_team'] = [
             'search'    => true,
             'eval'      => ['tl_class' => 'w50', 'maxlength' => 128],
             'flag'      => 3, // Sort by initial X letters ascending (see length)
-            'length'    => 8,
+            'length'    => 5,
             'sql'       => "varchar(128) NOT NULL default ''",
         ],
 

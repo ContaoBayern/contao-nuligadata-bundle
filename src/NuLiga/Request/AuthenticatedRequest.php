@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace ContaoBayern\NuligadataBundle\NuLiga\Request;
 
-use Contao\Date;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Cache\InvalidArgumentException;
+use \Monolog\Logger;
+use Psr\Log\LogLevel;
 use RuntimeException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,11 +51,10 @@ class AuthenticatedRequest
     protected $credentials;
 
     /**
-     * Authentification constructor.
-     *
-     * @param ContainerInterface $container
-     * @throws InvalidArgumentException
+     * @var int
      */
+    protected $lastStatus;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -77,36 +77,38 @@ class AuthenticatedRequest
 
         $this->client = new Client([
             'base_uri'                  => $this->credentials[self::PARAM_NU_PORTAL_RS_HOST],
-            RequestOptions::HTTP_ERRORS => false, // false => disable throwing exceptions on an HTTP protocol errors // TODO: erhaltenen HTTP-Status-Code abfragen und behandeln
+            RequestOptions::HTTP_ERRORS => false, // false => disable throwing exceptions on an HTTP protocol errors
             RequestOptions::DEBUG       => false,
         ]);
     }
 
     /**
      * Ggf. vorhandenen gecachte Werte von access-tokens auslesen
-     *
-     * @throws InvalidArgumentException
      */
     protected function getCachedTokenValues()
     {
-        /** @var $appCache FilesystemAdapter */
-        $appCache = $this->container->get('cache.app');
+        try {
+            /** @var $appCache FilesystemAdapter */
+            $appCache = $this->container->get('cache.app');
 
-        foreach ([
-                     self::NU_ACCESS_TOKEN_KEY,
-                     self::NU_REFRESH_TOKEN_KEY,
-                     self::NU_TOKEN_TIMESTAMP_KEY,
-                 ] as $key) {
-            $cacheItem = $appCache->getItem($key);
-            if ($cacheItem->isHit()) {
-                $this->tokens[$key] = $cacheItem->get();
+            foreach ([
+                         self::NU_ACCESS_TOKEN_KEY,
+                         self::NU_REFRESH_TOKEN_KEY,
+                         self::NU_TOKEN_TIMESTAMP_KEY,
+                     ] as $key) {
+                $cacheItem = $appCache->getItem($key);
+                if ($cacheItem->isHit()) {
+                    $this->tokens[$key] = $cacheItem->get();
+                }
             }
-        }
-        print "gecachte Token-Daten\n";
-        print_r($this->tokens);
-
-        if (null !== $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY]) {
-            print "Tokeninformation Zeitstempel: " . Date::parse('Y-m-d H:i:s', $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY]) . "\n";
+        } catch (InvalidArgumentException $e) {
+            /** @var Logger $logger */
+            $logger = $this->container->get('monolog.logger.contao');
+            $logger->log(
+                LogLevel::ERROR,
+                'versuche gecachte keys zu bestimmen; ignoriere: '.$e->getMessage(),
+                [ 'contao' => new ContaoContext(__METHOD__) ]
+            );
         }
     }
 
@@ -128,7 +130,7 @@ class AuthenticatedRequest
             }
         }
         if (!$this->hasCredentials()) {
-            throw new RuntimeException("konnte credentials nicht bestimmen (siehe Datei parameters.yml)");
+            throw new RuntimeException("konnte credentials nicht bestimmen (müssen in parameters.yml gesetzt sein)");
         }
     }
 
@@ -143,47 +145,42 @@ class AuthenticatedRequest
 
     /**
      * @return bool
-     * // throws GuzzleException
-     * @throws InvalidArgumentException
      */
     public function authenticate(): bool
     {
-        // TODO? Wenn wir ein gecachtes Renew-Token haben, versuchen, dieses zu verlängern
-        // TODO: Logik "Versuche neues Access Token zu besorgen" aus renewAccessToken() entfernen und hier durchführen
-        try {
-            if (!empty($this->tokens[self::NU_REFRESH_TOKEN_KEY])) {
-                try {
-                    $this->renewAccessToken();
-                    // FIXME: mit der RequestOptions::HTTP_ERRORS == false Einstellung im $this->>client
-                    // sollten wir hier nicht nur Exceptions, sondern auch den Response-Status 4xx abfragen
-                } catch (GuzzleException $e) {
-                    $this->acquireAccessToken();
-                }
-            } else {
+        if ($this->lastStatus === 200 &&
+            time() - $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] < 30 // 30 Sekunden
+        ) {
+            print "authentifiziere nicht neu\n";
+            return true;
+        }
+        $this->lastStatus = 0;
+
+        if (!empty($this->tokens[self::NU_REFRESH_TOKEN_KEY])) {
+            if (!$this->renewAccessToken()) {
                 $this->acquireAccessToken();
             }
-        } catch (GuzzleException $e) {
-            print $e->getMessage() . "\n";
-            return false;
+        } else {
+            $this->acquireAccessToken();
         }
-        return true;
+        return $this->lastStatus === 200;
     }
 
     /**
      * Das access_token erneuern
      *
-     * @throws GuzzleException
-     * @throws InvalidArgumentException
+     * @returns bool
      */
-    protected function renewAccessToken(): void
+    protected function renewAccessToken(): bool
     {
         if (!$this->hasCredentials()) {
-            return;
+            return false;
         }
         if (!$this->hasRefreshToken()) {
-            return;
+            return false;
         }
-        print "sende renew request\n";
+
+print "sende renew request\n"; // TODO nur debug
 
         $response = $this->client->request('POST', '/rs/auth/token', [
             RequestOptions::FORM_PARAMS => [
@@ -198,66 +195,28 @@ class AuthenticatedRequest
             ],
         ]);
 
+        $this->lastStatus = $response->getStatusCode();
+
         if ($response->getStatusCode() === 200) {
             $this->cacheTokenValues($response->getBody()->getContents());
-        } else {
-            printf("renew nicht erfolgreich. statuscode: %s\n", $response->getStatusCode());
+            return true;
         }
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasRefreshToken(): bool
-    {
-        return $status = !empty($this->tokens[self::NU_REFRESH_TOKEN_KEY]);
-    }
-
-    /**
-     * Die Token aus der Anmeldung bei der NuLiga-API im Cache speichern
-     *
-     * @param string $response
-     * @throws InvalidArgumentException
-     */
-    protected function cacheTokenValues(string $response): void
-    {
-        $tokens = json_decode($response, true);
-
-        if (null === $tokens) {
-            print("Konnte response nicht als JSON parsen!\n");
-            return;
-        }
-
-        $this->tokens[self::NU_ACCESS_TOKEN_KEY] = $tokens['access_token'];
-        $this->tokens[self::NU_REFRESH_TOKEN_KEY] = $tokens['refresh_token'];
-        $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] = time();
-
-        /** @var $appCache FilesystemAdapter */
-        $appCache = $this->container->get('cache.app');
-
-        foreach ([
-                     self::NU_ACCESS_TOKEN_KEY,
-                     self::NU_REFRESH_TOKEN_KEY,
-                     self::NU_TOKEN_TIMESTAMP_KEY,
-                 ] as $key) {
-            $cacheItem = $appCache->getItem($key);
-            $cacheItem->set($this->tokens[$key]);
-            $appCache->save($cacheItem);
-        }
+printf("renew nicht erfolgreich. statuscode: %s\n", $response->getStatusCode()); // TODO nur debug
+        return false;
     }
 
     /**
      * Anmelden (ein access_token besorgen)
      *
-     * @throws GuzzleException
-     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     protected function acquireAccessToken(): void
     {
         if (!$this->hasCredentials()) {
             return;
         }
-        print "sende authentifizierungs request\n";
+
+print "sende authentifizierungs request\n"; // TODO nur debug
 
         $response = $this->client->request('POST', '/rs/auth/token', [
             RequestOptions::FORM_PARAMS => [
@@ -271,17 +230,71 @@ class AuthenticatedRequest
             ],
         ]);
 
+        $this->lastStatus = $response->getStatusCode();
+
         if ($response->getStatusCode() === 200) {
             $this->cacheTokenValues($response->getBody()->getContents());
         } else {
-            printf("authentifizierung nicht erfolgreich. statuscode: %s\n", $response->getStatusCode());
+            $message = "authentifizierung nicht erfolgreich. statuscode: ".$response->getStatusCode();
+            throw new RuntimeException($message);
+        }
+    }
+
+
+    /**
+     * @return bool
+     */
+    protected function hasRefreshToken(): bool
+    {
+        return $status = !empty($this->tokens[self::NU_REFRESH_TOKEN_KEY]);
+    }
+
+    /**
+     * Die Token aus der Anmeldung bei der NuLiga-API im Cache speichern
+     *
+     * @param string $response
+     */
+    protected function cacheTokenValues(string $response): void
+    {
+        $tokens = json_decode($response, true);
+
+        if (null === $tokens) {
+            /** @var Logger $logger */
+            $logger = $this->container->get('monolog.logger.contao');
+            $logger->log(
+                LogLevel::ERROR,
+                'Konnte response nicht als JSON parsen',
+                [ 'contao' => new ContaoContext(__METHOD__) ]
+            );
+            return;
+        }
+
+        $this->tokens[self::NU_ACCESS_TOKEN_KEY] = $tokens['access_token'];
+        $this->tokens[self::NU_REFRESH_TOKEN_KEY] = $tokens['refresh_token'];
+        $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] = time();
+
+        /** @var $appCache FilesystemAdapter */
+        $appCache = $this->container->get('cache.app');
+
+        try {
+
+            foreach ([
+                         self::NU_ACCESS_TOKEN_KEY,
+                         self::NU_REFRESH_TOKEN_KEY,
+                         self::NU_TOKEN_TIMESTAMP_KEY,
+                     ] as $key) {
+                $cacheItem = $appCache->getItem($key);
+                $cacheItem->set($this->tokens[$key]);
+                $appCache->save($cacheItem);
+            }
+        } catch (InvalidArgumentException $e) {
+            throw new RuntimeException($e->getMessage());
         }
     }
 
     /**
      * @param string $url
      * @return array
-     * @throws GuzzleException
      */
     public function authenticatedRequest(string $url): array
     {
@@ -301,6 +314,8 @@ class AuthenticatedRequest
             ]
         );
 
+        $this->lastStatus = $response->getStatusCode();
+
         if ($response->getStatusCode() === 200) {
             return json_decode($response->getBody()->getContents(), true);
         } else {
@@ -319,4 +334,11 @@ class AuthenticatedRequest
         return !empty($this->tokens[self::NU_ACCESS_TOKEN_KEY]);
     }
 
+    /**
+     * @return int
+     */
+    public function getLastStatus(): int
+    {
+        return $this->lastStatus;
+    }
 }

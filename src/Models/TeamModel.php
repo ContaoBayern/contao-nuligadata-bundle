@@ -8,8 +8,11 @@ use Contao\Model;
  * Class TeamModel
  *
  * @package ContaoBayern\NuligadataBundle\Models
+ * @property int id
+ * @property int tstamp
+ * @property string $name App-interner Name
  * @property string $nu_id
- * @property string $nu_name
+ * @property string $nu_name Name uas der nuLiga API
  * @property string $nu_group
  * @property string $nu_season
  * @property int $calendar

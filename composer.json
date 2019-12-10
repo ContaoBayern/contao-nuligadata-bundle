@@ -14,6 +14,10 @@
       "role": "Developer"
     }
   ],
+  "support": {
+    "source": "https://github.com/ContaoBayern/contao-nuligadata-bundle",
+    "issues": "https://github.com/ContaoBayern/contao-nuligadata-bundle/issues"
+  },
   "require": {
     "php": "^7.1",
     "ext-json": "*",

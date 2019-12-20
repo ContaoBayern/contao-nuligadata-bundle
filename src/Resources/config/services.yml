@@ -1,7 +1,7 @@
 services:
 
-    app.test.command:
-        class: ContaoBayern\NuligadataBundle\Command\TestCommand
+    app.apiaccess.command:
+        class: ContaoBayern\NuligadataBundle\Command\AccessApiCommand
         public: true
         tags: ['console.command']
         calls:

@@ -3,6 +3,7 @@
 namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 // use Contao\CalendarEventsModel;
+use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 
 class Meetings extends BaseDataHandler
@@ -17,6 +18,14 @@ class Meetings extends BaseDataHandler
      */
     public function getAndStoreData(string $fedNickname, string $seasonNickname, string $clubNr): void
     {
+        $data = $this->getData($fedNickname, $seasonNickname, $clubNr);
+        if (isset($data['meetingAbbr']) && is_array($data['meetingAbbr'])) {
+            $this->storeData($data, $clubNr);
+        }
+    }
+
+    public function getData(string $fedNickname, string $seasonNickname, string $clubNr): array
+    {
         $this->prepareRequest();
         $fedNickname = rawurlencode($fedNickname);
         $seasonNickname = rawurlencode($seasonNickname);
@@ -24,20 +33,21 @@ class Meetings extends BaseDataHandler
         $url = sprintf(self::URL_PATTERN, $fedNickname, $seasonNickname, $clubNr, $maxResults);
         $data = $this->authenticatedRequest->authenticatedRequest($url);
         if ($this->authenticatedRequest->getLastStatus() === 200) {
-            $this->storeData($data);
+            return $data;
         } else {
-            print_r($data);
+            return [];
         }
     }
 
     /**
      * @param $data
+     * @param string $clubNr
      */
-    protected function storeData($data): void
+    protected function storeData($data, string $clubNr): void
     {
         printf("%d Ergebnisse erhalten\n", count($data['meetingAbbr']));
 
-        // nur debug; TODO über alle Einträge iterieren
+        // nur debug -- TODO über alle Einträge iterieren
         $meeting = $data['meetingAbbr'][0];
 
         $meetingData = [];
@@ -57,14 +67,26 @@ class Meetings extends BaseDataHandler
                      'matchesGuest',
                      'championshipRegion',
                      'championshipNickname',
+                     'teamHomeClubNr',
+                     'teamGuestClubNr',
                  ] as $key) {
             $meetingData[$key] = $meeting[$key];
         }
 
-        print_r($meetingData);
+        $meetingData['homeaway'] = $meetingData['teamHomeClubNr'] === $clubNr ? 'home' : 'guest';
+        if ($meetingData['teamHomeClubNr'] === $clubNr) {
+            $meetingData['homeaway'] = 'home';
+            $meetingData['team'] = TeamModel::findBy('nu_id', $meetingData['teamHomeId'])->name;
+        } else {
+            $meetingData['homeaway'] = 'guest';
+            $meetingData['team'] = TeamModel::findBy('nu_id', $meetingData['teamGuestId'])->name;
+        }
 
-        //$meetingData['homeaway'] = ...// TODO: aus $meeting['teamHomeClubNr'], $meeting['teamGuestClubNr'] und $clubNr
-        //$meetingData['team'] = ... // TODO: interne Daten über TeamModel
+        print_r([
+            'übermittelte meetings' => count($data['meetingAbbr']),
+            'daten des ersten meetings' => $meetingData,
+            ]
+        );
 
         //$event = CalendarEventsModel::findBy(['nu_XXX=?'], [$meetingData['team']->XXX]);
         // if (null === $event) {

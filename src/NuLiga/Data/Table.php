@@ -17,14 +17,28 @@ class Table extends BaseDataHandler
      */
     public function getAndStoreData(string $fedNickname, string $clubNr, string $teamId): void
     {
+        $data = $this->getData($fedNickname, $clubNr, $teamId);
+        if (isset($data['groupTable'][0]) && is_array($data['groupTable'][0])) {
+            $this->storeData($data);
+        }
+    }
+
+    /**
+     * @param string $fedNickname
+     * @param string $clubNr
+     * @param string $teamId
+     * @return array
+     */
+    public function getData(string $fedNickname, string $clubNr, string $teamId): array
+    {
         $this->prepareRequest();
         $fedNickname = rawurlencode($fedNickname);
         $url = sprintf(self::URL_PATTERN, $fedNickname, $clubNr, $teamId);
         $data = $this->authenticatedRequest->authenticatedRequest($url);
         if ($this->authenticatedRequest->getLastStatus() === 200) {
-            $this->storeData($data);
+            return $data;
         } else {
-            print_r($data);
+            return [];
         }
     }
 
@@ -51,7 +65,7 @@ class Table extends BaseDataHandler
         }
         // TODO: wie speichern wir die Daten und wie werden sie an das Template des
         // (noch zu erstellenden) ContentElements übergeben?
-        // * Als Teil eines MannschaftModels via https://github.com/fiedsch/contao-jsonwidget?
+        // * Als Teil eines MannschaftModels z.B. via https://github.com/fiedsch/contao-jsonwidget?
         // * als JSON (oder YAML)-Datei unter /files
     }
 }

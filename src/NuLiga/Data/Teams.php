@@ -17,15 +17,30 @@ class Teams extends BaseDataHandler
      */
     public function getAndStoreData(string $fedNickname, string $seasonNickname, string $clubNr): void
     {
+        $data = $this->getData($fedNickname, $seasonNickname, $clubNr);
+        if (isset($data['teamAbbr']) && is_array($data['teamAbbr'])) {
+            $this->storeData($data);
+        }
+    }
+
+    /**
+     * @param string $fedNickname
+     * @param string $seasonNickname
+     * @param string $clubNr
+     * @return array
+     * @throws RuntimeException
+     */
+    public function getData(string $fedNickname, string $seasonNickname, string $clubNr): array
+    {
         $this->prepareRequest();
         $fedNickname = rawurlencode($fedNickname);
         $seasonNickname = rawurlencode($seasonNickname);
         $url = sprintf(self::URL_PATTERN, $fedNickname, $seasonNickname, $clubNr);
         $data = $this->authenticatedRequest->authenticatedRequest($url);
         if ($this->authenticatedRequest->getLastStatus() === 200) {
-            $this->storeData($data);
+            return $data;
         } else {
-            print_r($data);
+            return [];
         }
     }
 

@@ -26,11 +26,5 @@ class BaseDataHandler
             throw new RuntimeException('konnte nicht authentifizieren');
         }
     }
-    /**
-     * @param $data
-     */
-    protected function storeData($data): void
-    {
-        print_r($data);
-    }
+
 }

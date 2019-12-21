@@ -43,10 +43,10 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Contao "booten" (falls benötigt -- z.B. um Models zu verwenden)
-        $this->framework->initialize();
-
         try {
+            // Contao "booten"
+            $this->framework->initialize();
+
             $fedNickname = $input->getArgument('fedNickname');
             $seasonNickname = $input->getArgument('seasonNickname');
             $clubNr = $input->getArgument('clubNr');

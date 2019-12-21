@@ -74,8 +74,8 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
             }
 
             if ('table' === $action) {
-                // TODO: alle TeamModel zur aktuellen Saison holen und über sie iterieren ($teamId)
                 $table = new Table($nuApiRequest);
+                // TODO: alle TeamModel zur aktuellen Saison holen und über sie iterieren ($teamId)
                 $teamId = '1327635';
                 $table->getAndStoreData($fedNickname, $clubNr, $teamId);
             }

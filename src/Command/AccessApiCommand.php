@@ -34,8 +34,7 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
             ->addArgument('fedNickname', InputArgument::REQUIRED, 'Verband (z.B. "BHV")')
             ->addArgument('seasonNickname', InputArgument::REQUIRED, 'Saison (z.B. "19/20")')
             ->addArgument('clubNr', InputArgument::REQUIRED, 'Club-Nummer (z.B. 12345)')
-            ->addArgument('action', InputArgument::REQUIRED, 'Action (teams|meetings|table)')
-            ;
+            ->addArgument('action', InputArgument::REQUIRED, 'Action (all|teams|meetings|table)');
     }
 
     /**
@@ -52,7 +51,7 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
             $clubNr = $input->getArgument('clubNr');
             $action = $input->getArgument('action');
 
-            if (!in_array($action, ['teams', 'meetings', 'table'])) {
+            if (!in_array($action, ['all', 'teams', 'meetings', 'table'])) {
                 throw new InvalidParameterException('gültige Werte für action sind teams|meetings|table');
             }
 
@@ -63,18 +62,18 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
                 throw new RuntimeException('konnte nicht authentifizieren');
             }
 
-            if ('teams' === $action) {
                 $teams = new Teams($nuApiRequest);
+            if (in_array($action, ['all', 'teams'])) {
                 $teams->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
-            if ('meetings' === $action) {
                 $meetings = new Meetings($nuApiRequest);
+            if (in_array($action, ['all', 'meetings'])) {
                 $meetings->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
-            if ('table' === $action) {
                 $table = new Table($nuApiRequest);
+            if (in_array($action, ['all', 'table'])) {
                 // TODO: alle TeamModel zur aktuellen Saison holen und über sie iterieren ($teamId)
                 $teamId = '1327635';
                 $table->getAndStoreData($fedNickname, $clubNr, $teamId);

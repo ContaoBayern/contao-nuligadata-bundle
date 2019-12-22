@@ -3,6 +3,7 @@
 namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 // use Contao\CalendarEventsModel;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use RuntimeException;
 
 class Table extends BaseDataHandler
@@ -38,6 +39,9 @@ class Table extends BaseDataHandler
         if ($this->authenticatedRequest->getLastStatus() === 200) {
             return $data;
         } else {
+            $this->logger->addError('nuliga:apiaccess "table" '.$this->authenticatedRequest->getLastStatusMessage(),
+                ['contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]
+            );
             return [];
         }
     }
@@ -67,5 +71,9 @@ class Table extends BaseDataHandler
         // (noch zu erstellenden) ContentElements übergeben?
         // * Als Teil eines MannschaftModels z.B. via https://github.com/fiedsch/contao-jsonwidget?
         // * als JSON (oder YAML)-Datei unter /files
+
+        $this->logger->addError('nuliga:apiaccess "table" synchronisiert',
+            ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
+        );
     }
 }

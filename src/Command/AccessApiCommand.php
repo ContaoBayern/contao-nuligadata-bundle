@@ -2,12 +2,15 @@
 
 namespace ContaoBayern\NuligadataBundle\Command;
 
+use Contao\System;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\CoreBundle\Framework\FrameworkAwareInterface;
 use Contao\CoreBundle\Framework\FrameworkAwareTrait;
-use ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest;
-use ContaoBayern\NuligadataBundle\NuLiga\Data\Teams;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Meetings;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Table;
+use ContaoBayern\NuligadataBundle\NuLiga\Data\Teams;
+use ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest;
+use Monolog\Logger;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -58,22 +61,32 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
             /** @var AuthenticatedRequest $nuApiRequest */
             $nuApiRequest = $this->container->get('nuliga.authenticated.request');
 
+            /** @var Logger $logger */
+            $logger = System::getContainer()->get('monolog.logger.contao');
+
+            //$logger->addInfo('Aktualisiere Daten über die nuLiga API',
+            //    ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
+            //);
+
             if (!$nuApiRequest->authenticate()) {
+                $logger->addError('konnte nicht bei der nuLiga API authentifizieren',
+                    ['contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]
+                );
                 throw new RuntimeException('konnte nicht authentifizieren');
             }
 
-                $teams = new Teams($nuApiRequest);
             if (in_array($action, ['all', 'teams'])) {
+                $teams = new Teams($nuApiRequest, $logger);
                 $teams->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
-                $meetings = new Meetings($nuApiRequest);
             if (in_array($action, ['all', 'meetings'])) {
+                $meetings = new Meetings($nuApiRequest, $logger);
                 $meetings->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
-                $table = new Table($nuApiRequest);
             if (in_array($action, ['all', 'table'])) {
+                $table = new Table($nuApiRequest, $logger);
                 // TODO: alle TeamModel zur aktuellen Saison holen und über sie iterieren ($teamId)
                 $teamId = '1327635';
                 $table->getAndStoreData($fedNickname, $clubNr, $teamId);

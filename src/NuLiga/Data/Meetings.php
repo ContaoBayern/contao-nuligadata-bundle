@@ -3,6 +3,7 @@
 namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 // use Contao\CalendarEventsModel;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 
@@ -35,6 +36,9 @@ class Meetings extends BaseDataHandler
         if ($this->authenticatedRequest->getLastStatus() === 200) {
             return $data;
         } else {
+            $this->logger->addError('nuliga:apiaccess "meetings" '.$this->authenticatedRequest->getLastStatusMessage(),
+                ['contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]
+            );
             return [];
         }
     }
@@ -98,6 +102,10 @@ class Meetings extends BaseDataHandler
         // $event->nu_group = $teamData['nu_group'];
         // $event->nu_season = $teamData['nu_season'];
         // $event->save();
+
+        $this->logger->addError('nuliga:apiaccess "meetings" synchronisiert',
+            ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
+        );
     }
 
 }

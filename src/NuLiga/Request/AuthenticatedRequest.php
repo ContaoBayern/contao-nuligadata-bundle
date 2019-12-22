@@ -55,6 +55,11 @@ class AuthenticatedRequest
      */
     protected $lastStatus;
 
+    /**
+     * @var string
+     */
+    protected $lastStatusMessage;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -151,10 +156,10 @@ class AuthenticatedRequest
         if ($this->lastStatus === 200 &&
             time() - $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] < 30 // 30 Sekunden
         ) {
-            print "authentifiziere nicht neu\n";
             return true;
         }
         $this->lastStatus = 0;
+        $this->lastStatusMessage = '';
 
         if (!empty($this->tokens[self::NU_REFRESH_TOKEN_KEY])) {
             if (!$this->renewAccessToken()) {
@@ -180,8 +185,6 @@ class AuthenticatedRequest
             return false;
         }
 
-print "sende renew request\n"; // TODO nur debug
-
         $response = $this->client->request('POST', '/rs/auth/token', [
             RequestOptions::FORM_PARAMS => [
                 'grant_type'    => "refresh_token",
@@ -196,12 +199,13 @@ print "sende renew request\n"; // TODO nur debug
         ]);
 
         $this->lastStatus = $response->getStatusCode();
+        $this->lastStatusMessage = $response->getReasonPhrase();
 
         if ($response->getStatusCode() === 200) {
             $this->cacheTokenValues($response->getBody()->getContents());
             return true;
         }
-printf("renew nicht erfolgreich. statuscode: %s\n", $response->getStatusCode()); // TODO nur debug
+
         return false;
     }
 
@@ -216,8 +220,6 @@ printf("renew nicht erfolgreich. statuscode: %s\n", $response->getStatusCode());
             return;
         }
 
-print "sende authentifizierungs request\n"; // TODO nur debug
-
         $response = $this->client->request('POST', '/rs/auth/token', [
             RequestOptions::FORM_PARAMS => [
                 'grant_type'    => "client_credentials",
@@ -231,6 +233,7 @@ print "sende authentifizierungs request\n"; // TODO nur debug
         ]);
 
         $this->lastStatus = $response->getStatusCode();
+        $this->lastStatusMessage = $response->getReasonPhrase();
 
         if ($response->getStatusCode() === 200) {
             $this->cacheTokenValues($response->getBody()->getContents());
@@ -298,7 +301,6 @@ print "sende authentifizierungs request\n"; // TODO nur debug
      */
     public function authenticatedRequest(string $url): array
     {
-        print "sende Datenanfrage\n";
         if (!$this->hasAccessToken()) {
             print "Habe kein Access Token\n";
             return ['error' => 'Habe kein Access Token'];
@@ -315,14 +317,12 @@ print "sende authentifizierungs request\n"; // TODO nur debug
         );
 
         $this->lastStatus = $response->getStatusCode();
+        $this->lastStatusMessage = $response->getReasonPhrase();
 
         if ($response->getStatusCode() === 200) {
             return json_decode($response->getBody()->getContents(), true);
         } else {
-            return [
-                'error'  => $response->getReasonPhrase(),
-                'status' => $response->getStatusCode(),
-            ];
+            return [];
         }
     }
 
@@ -341,4 +341,13 @@ print "sende authentifizierungs request\n"; // TODO nur debug
     {
         return $this->lastStatus;
     }
+
+    /**
+     * @return string
+     */
+    public function getLastStatusMessage(): string
+    {
+        return $this->lastStatusMessage;
+    }
+
 }

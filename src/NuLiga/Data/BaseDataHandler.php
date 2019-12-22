@@ -3,6 +3,7 @@
 namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 use ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest;
+use Monolog\Logger;
 use RuntimeException;
 
 class BaseDataHandler
@@ -12,9 +13,15 @@ class BaseDataHandler
      */
     protected $authenticatedRequest;
 
-    public function __construct(AuthenticatedRequest $authenticatedRequest)
+    /**
+     * @var Logger
+     */
+    protected $logger;
+
+    public function __construct(AuthenticatedRequest $authenticatedRequest, Logger $logger)
     {
         $this->authenticatedRequest = $authenticatedRequest;
+        $this->logger = $logger;
     }
 
     /**

@@ -17,3 +17,9 @@ array_insert($GLOBALS['BE_MOD'], 0, [
  */
 
 $GLOBALS['TL_MODELS']['tl_team'] = 'ContaoBayern\NuligadataBundle\Models\TeamModel';
+
+
+/* Add to Backend CSS */
+if (TL_MODE === 'BE') {
+    $GLOBALS['TL_CSS'][] = 'bundles/contaobayernnuligadata/backend.css';
+}

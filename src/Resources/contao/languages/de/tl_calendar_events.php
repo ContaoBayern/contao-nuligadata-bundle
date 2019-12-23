@@ -54,8 +54,3 @@ $GLOBALS['TL_LANG']['tl_calendar_events']['tstamp'] = [
     'Zuletzt aktualisiert',
     'Datum der letzten Aktualisierung (Daten aus nuLiga geholt)'
 ];
-
-//$GLOBALS['TL_LANG']['tl_calendar_events']['xxx'] = [
-//    'Kurzlabel',
-//    'Hilfetext'
-//];

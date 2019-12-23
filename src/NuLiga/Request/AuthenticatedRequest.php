@@ -8,7 +8,7 @@ use Contao\CoreBundle\Monolog\ContaoContext;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Psr\Cache\InvalidArgumentException;
-use \Monolog\Logger;
+use Monolog\Logger;
 use Psr\Log\LogLevel;
 use RuntimeException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -60,6 +60,12 @@ class AuthenticatedRequest
      */
     protected $lastStatusMessage;
 
+
+    /**
+     * @var Logger
+     */
+    protected $logger;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -75,6 +81,8 @@ class AuthenticatedRequest
             self::PARAM_NU_CLIENT_SECRET  => null,
             self::PARAM_NU_PORTAL_RS_HOST => null,
         ];
+
+        $this->logger = $this->container->get('monolog.logger.contao');
 
         $this->getCachedTokenValues();
 
@@ -104,15 +112,13 @@ class AuthenticatedRequest
                 $cacheItem = $appCache->getItem($key);
                 if ($cacheItem->isHit()) {
                     $this->tokens[$key] = $cacheItem->get();
+                    $this->logger->addDebug("hole gecachten Wert '$key': ".$this->tokens[$key]);
                 }
             }
         } catch (InvalidArgumentException $e) {
-            /** @var Logger $logger */
-            $logger = $this->container->get('monolog.logger.contao');
-            $logger->log(
-                LogLevel::ERROR,
+            $this->logger->addError(
                 'versuche gecachte keys zu bestimmen; ignoriere: '.$e->getMessage(),
-                [ 'contao' => new ContaoContext(__METHOD__) ]
+                [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR) ]
             );
         }
     }
@@ -135,7 +141,9 @@ class AuthenticatedRequest
             }
         }
         if (!$this->hasCredentials()) {
-            throw new RuntimeException("konnte credentials nicht bestimmen (müssen in parameters.yml gesetzt sein)");
+            $message = "konnte credentials nicht bestimmen (müssen in parameters.yml gesetzt sein)";
+            $this->logger->addError($message, [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR) ]);
+            throw new RuntimeException($message);
         }
     }
 
@@ -156,6 +164,7 @@ class AuthenticatedRequest
         if ($this->lastStatus === 200 &&
             time() - $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] < 30 // 30 Sekunden
         ) {
+            $this->logger->addDebug("token sollte noch gültig sein: keine erneute authentifizierung");
             return true;
         }
         $this->lastStatus = 0;
@@ -239,6 +248,7 @@ class AuthenticatedRequest
             $this->cacheTokenValues($response->getBody()->getContents());
         } else {
             $message = "authentifizierung nicht erfolgreich. statuscode: ".$response->getStatusCode();
+            $this->logger->addError($message, [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]);
             throw new RuntimeException($message);
         }
     }
@@ -262,9 +272,7 @@ class AuthenticatedRequest
         $tokens = json_decode($response, true);
 
         if (null === $tokens) {
-            /** @var Logger $logger */
-            $logger = $this->container->get('monolog.logger.contao');
-            $logger->log(
+            $this->logger->log(
                 LogLevel::ERROR,
                 'Konnte response nicht als JSON parsen',
                 [ 'contao' => new ContaoContext(__METHOD__) ]
@@ -280,7 +288,6 @@ class AuthenticatedRequest
         $appCache = $this->container->get('cache.app');
 
         try {
-
             foreach ([
                          self::NU_ACCESS_TOKEN_KEY,
                          self::NU_REFRESH_TOKEN_KEY,
@@ -291,6 +298,7 @@ class AuthenticatedRequest
                 $appCache->save($cacheItem);
             }
         } catch (InvalidArgumentException $e) {
+            $this->logger->addError($e->getMessage(), [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]);
             throw new RuntimeException($e->getMessage());
         }
     }

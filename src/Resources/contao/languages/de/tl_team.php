@@ -4,6 +4,8 @@ $GLOBALS['TL_LANG']['tl_team']['title_legend'] = 'Mannschaft';
 
 $GLOBALS['TL_LANG']['tl_team']['nuliga_legend'] = 'nuLiga';
 
+$GLOBALS['TL_LANG']['tl_team']['data_legend'] = 'Daten';
+
 // TODO: in Contao 4.8 gibt es (IIRC) generische "neu" Labels. D.h. das folgende sollte entfallen.
 $GLOBALS['TL_LANG']['tl_team']['new'] = [
     'Neues Team',
@@ -33,4 +35,9 @@ $GLOBALS['TL_LANG']['tl_team']['nu_group'] = [
 $GLOBALS['TL_LANG']['tl_team']['nu_season'] = [
     'Saison',
     'Saisonbezeichnung, beispielsweise "19/20".'
+];
+
+$GLOBALS['TL_LANG']['tl_team']['json_data'] = [
+  'Daten',
+  'Daten, die aus der nuLiga API geholt wurden'
 ];

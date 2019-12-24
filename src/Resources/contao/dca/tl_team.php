@@ -74,7 +74,7 @@ $GLOBALS['TL_DCA']['tl_team'] = [
 
     'palettes' => [
         '__selector__' => [],
-        'default'      => '{title_legend},name,calendar;{nuliga_legend},nu_id,nu_name,nu_group,nu_season',
+        'default'      => '{title_legend},name,calendar;{nuliga_legend},nu_id,nu_name,nu_group,nu_season;{data_legend},json_data',
     ], // palettes
 
     'fields' => [
@@ -140,6 +140,13 @@ $GLOBALS['TL_DCA']['tl_team'] = [
             'sql'       => "varchar(128) NOT NULL default ''",
         ],
 
-    ], // fields
+        'json_data' => [
+            'inputType' => 'jsonWidget',
+            'label'     => &$GLOBALS['TL_LANG']['tl_team']['json_data'],
+            'eval'      => ['tl_style'=>'long', 'decodeEntities'=>true, 'allowHtml'=>true],
+            'sql'       => "blob NULL",
+        ],
+
+], // fields
 
 ];

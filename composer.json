@@ -22,7 +22,8 @@
     "php": "^7.1",
     "ext-json": "*",
     "contao/core-bundle": "^4.4",
-    "contao/calendar-bundle": "^4.4"
+    "contao/calendar-bundle": "^4.4",
+    "fiedsch/contao-jsonwidget": "^0.3.0"
   },
   "autoload": {
     "psr-4": {

@@ -3,6 +3,7 @@
 namespace ContaoBayern\NuligadataBundle\Models;
 
 use Contao\Model;
+use Fiedsch\JsonWidgetBundle\Traits\JsonGetterSetterTrait;
 
 /**
  * Class TeamModel
@@ -20,5 +21,10 @@ use Contao\Model;
  */
 class TeamModel extends Model
 {
+    use JsonGetterSetterTrait;
+
     protected static $strTable = 'tl_team';
+
+    protected static $strJsonColumn = 'json_data';
+
 }

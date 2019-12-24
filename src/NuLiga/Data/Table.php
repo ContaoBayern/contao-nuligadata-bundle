@@ -4,6 +4,7 @@ namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 // use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
+use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 
 class Table extends BaseDataHandler
@@ -20,7 +21,7 @@ class Table extends BaseDataHandler
     {
         $data = $this->getData($fedNickname, $clubNr, $teamId);
         if (isset($data['groupTable'][0]) && is_array($data['groupTable'][0])) {
-            $this->storeData($data);
+            $this->storeData($data, $teamId);
         }
     }
 
@@ -48,32 +49,38 @@ class Table extends BaseDataHandler
 
     /**
      * @param $data
+     * @param $teamId
      */
-    protected function storeData($data): void
+    protected function storeData($data, $teamId): void
     {
-        // Datenausgabe zum visuellen Test/Debuggen
+        $data_to_store = [];
         foreach($data['groupTable'][0]['groupTableTeam'] as $tableRow) {
+            $dataRow = [];
             // Datenstruktur: // {"tableRank":1,"team":"HSG Lauingen-Wittislingen","tendency":"steady","meetings":5,"ownPoints":10,"otherPoints":0,"ownPointsHome":6,"otherPointsHome":0,"ownPointsGuest":4,"otherPointsGuest":0,"ownMatches":144,"otherMatches":110,"ownMatchesSingle":null,"otherMatchesSingle":null,"ownMatchesDouble":null,"otherMatchesDouble":null,"ownSets":0,"otherSets":0,"ownGames":0,"otherGames":0,"ownMeetings":5,"otherMeetings":0,"tieMeetings":0,"teamNr":1,"clubNr":"90507","teamId":"1327935","teamUri":"https:\/\/hbde-portal.liga.nu\/rs\/2014\/teams\/1327935","teamState":"active","teamReleasedDate":null,"contestTypeNickname":"MA","teamStatistics":null,"riseAndFallState":"none"}
-            printf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-                $tableRow['tableRank'],
-                $tableRow['team'],
-                $tableRow['meetings'],
-                $tableRow['ownMeetings'],
-                $tableRow['tieMeetings'],
-                $tableRow['otherMeetings'],
-                $tableRow['ownPoints'],
-                $tableRow['otherPoints'],
-                $tableRow['ownMatches'],
-                $tableRow['otherMatches']
+            foreach ([
+                         'tableRank',
+                         'team',
+                         'meetings',
+                         'ownMeetings',
+                         'tieMeetings',
+                         'otherMeetings',
+                         'ownPoints',
+                         'otherPoints',
+                         'ownMatches',
+                         'otherMatches'
+                     ] as $column) {
+                $dataRow[$column] = $tableRow[$column];
+            }
+            $data_to_store[] = $dataRow;
+        }
+
+        $team = TeamModel::findBy(['nu_id=?'], $teamId);
+        if ($team) {
+            $team->current_table = $data_to_store;
+            $team->save();
+            $this->logger->addError("nuliga:apiaccess \"table\" für Team $teamId synchronisiert",
+                ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
             );
         }
-        // TODO: wie speichern wir die Daten und wie werden sie an das Template des
-        // (noch zu erstellenden) ContentElements übergeben?
-        // * Als Teil eines MannschaftModels z.B. via https://github.com/fiedsch/contao-jsonwidget?
-        // * als JSON (oder YAML)-Datei unter /files
-
-        $this->logger->addError('nuliga:apiaccess "table" synchronisiert',
-            ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
-        );
     }
 }

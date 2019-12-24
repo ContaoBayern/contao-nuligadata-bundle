@@ -6,6 +6,7 @@ use Contao\System;
 use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\CoreBundle\Framework\FrameworkAwareInterface;
 use Contao\CoreBundle\Framework\FrameworkAwareTrait;
+use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Meetings;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Table;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Teams;
@@ -87,9 +88,13 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
 
             if (in_array($action, ['all', 'table'])) {
                 $table = new Table($nuApiRequest, $logger);
-                // TODO: alle TeamModel zur aktuellen Saison holen und über sie iterieren ($teamId)
-                $teamId = '1327635';
-                $table->getAndStoreData($fedNickname, $clubNr, $teamId);
+                $teams = TeamModel::findBy('nu_season', $seasonNickname);
+                if ($teams) {
+                    /** @var TeamModel $team */
+                    foreach ($teams as $team) {
+                        $table->getAndStoreData($fedNickname, $clubNr, $team->nu_id);
+                    }
+                }
             }
 
         } catch (RuntimeException $e) {

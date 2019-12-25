@@ -2,7 +2,7 @@
 
 namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
-// use Contao\CalendarEventsModel;
+use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
@@ -36,7 +36,7 @@ class Meetings extends BaseDataHandler
         if ($this->authenticatedRequest->getLastStatus() === 200) {
             return $data;
         } else {
-            $this->logger->addError('nuliga:apiaccess "meetings" '.$this->authenticatedRequest->getLastStatusMessage(),
+            $this->logger->addError('nuliga:apiaccess "meetings" ' . $this->authenticatedRequest->getLastStatusMessage(),
                 ['contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]
             );
             return [];
@@ -46,62 +46,71 @@ class Meetings extends BaseDataHandler
     /**
      * @param $data
      * @param string $clubNr
+     * @noinspection PhpUndefinedFieldInspection für die tl_calendar_event Properties des Bundles
      */
     protected function storeData($data, string $clubNr): void
     {
-        printf("%d Ergebnisse erhalten\n", count($data['meetingAbbr']));
+        $meetings = $data['meetingAbbr'];
 
-        // nur debug -- TODO über alle Einträge iterieren
-        $meeting = $data['meetingAbbr'][0];
-
-        $meetingData = [];
-        foreach ([
-                     'meetingUuid',
-                     'meetingId',
-                     'scheduled',
-                     'endDate',
-                     'roundName',
-                     'courtHallName',
-                     'teamHome',
-                     'teamGuest',
-                     'teamHomeId',
-                     'teamGuestId',
-                     'groupName',
-                     'matchesHome',
-                     'matchesGuest',
-                     'championshipRegion',
-                     'championshipNickname',
-                     'teamHomeClubNr',
-                     'teamGuestClubNr',
-                 ] as $key) {
-            $meetingData[$key] = $meeting[$key];
+        // keine Daten?
+        if (!is_array($data['meetingAbbr'])) {
+            // TODO error-log
+            return;
         }
 
-        $meetingData['homeaway'] = $meetingData['teamHomeClubNr'] === $clubNr ? 'home' : 'guest';
-        if ($meetingData['teamHomeClubNr'] === $clubNr) {
-            $meetingData['homeaway'] = 'home';
-            $meetingData['team'] = TeamModel::findBy('nu_id', $meetingData['teamHomeId'])->name;
-        } else {
-            $meetingData['homeaway'] = 'guest';
-            $meetingData['team'] = TeamModel::findBy('nu_id', $meetingData['teamGuestId'])->name;
+        foreach ($meetings as $i => $meeting) {
+            // $ourTeamId = 0;
+            $ourTeam = null;
+
+            if ($meeting['teamHomeClubNr'] === $clubNr) {
+                $meeting['homeaway'] = 1;
+                $ourTeamId = $meeting['teamHomeId'];
+            } else {
+                $meeting['homeaway'] = 0; // 'guest';
+                $ourTeamId = $meeting['teamGuestId'];
+            }
+            $ourTeam = TeamModel::findBy('nu_id', $ourTeamId);
+
+            if (!$ourTeam) {
+                // TODO error-log
+                print "Team nicht gefunden: $ourTeamId";
+                return;
+            }
+            if (!$ourTeam->calendar) {
+                // TODO error-log
+                return;
+            }
+
+            $timestamp = strtotime($meeting['scheduled']); // TODO: vs 'originalDate' vs 'endDate' UND UTC vs local time?
+
+            $event = CalendarEventsModel::findBy(['meetingUuid=?'], [$meeting['meetingUuid']]);
+            // tl_calendar_event-Felder des Bundles
+            if (null === $event) {
+                $event = new CalendarEventsModel();
+                $event->meetingUuid = $meeting['meetingUuid'];
+            }
+            $event->teamHome = $meeting['teamHome'];
+            $event->teamGuest = $meeting['teamGuest'];
+            $event->courtHallName = $meeting['courtHallName'];
+            $event->homeaway = $meeting['homeaway'];
+            $event->matchesHome = $meeting['matchesHome'];
+            $event->matchesGuest = $meeting['matchesGuest'];
+            $event->roundName = $meeting['roundName'];
+
+            // Standard tl_calendar_event-Felder
+            $event->pid = $ourTeam->calendar;
+            $event->author = 1; // bei der Installation angelegter Administrator
+            $event->tstamp = time();
+            $event->published = true;
+            $event->startDate = $timestamp; // TODO (?) timestamp zu 00:00 Uhr des Datumns?
+            $event->addTime = true;
+            $event->startTime = $timestamp;
+            $event->endTime = $timestamp;
+            $event->location = $meeting['courtHallName'];
+            $event->title = sprintf('%s : %s', $meeting['teamHome'], $meeting['teamGuest']);
+
+            $event->save();
         }
-
-        print_r([
-            'übermittelte meetings' => count($data['meetingAbbr']),
-            'daten des ersten meetings' => $meetingData,
-            ]
-        );
-
-        //$event = CalendarEventsModel::findBy(['nu_XXX=?'], [$meetingData['team']->XXX]);
-        // if (null === $event) {
-        //        $event = new CalendarEventsModel();
-        //        $event->XXX = $meetingData['nu_XXX'];
-        // }
-        // $event->tstamp = time();
-        // $event->nu_name = $teamData['nu_name'];
-        // $event->nu_group = $teamData['nu_group'];
-        // $event->nu_season = $teamData['nu_season'];
-        // $event->save();
 
         $this->logger->addError('nuliga:apiaccess "meetings" synchronisiert',
             ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]

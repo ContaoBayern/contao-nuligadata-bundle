@@ -18,7 +18,7 @@ $GLOBALS['TL_LANG']['tl_calendar_events']['team'] = [
     'Name der Mannschaft (Daten aus nuLiga)'
 ];
 $GLOBALS['TL_LANG']['tl_calendar_events']['roundName'] = [
-    'Hin- oder Rückrunde',
+    'Runde',
     'Name der Runde (Daten aus nuLiga)'
 ];
 $GLOBALS['TL_LANG']['tl_calendar_events']['homeaway'] = [

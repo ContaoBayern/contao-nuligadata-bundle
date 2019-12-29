@@ -12,6 +12,16 @@ $GLOBALS['TL_LANG']['tl_team']['new'] = [
     'Ein neues Team anlegen'
 ];
 
+$GLOBALS['TL_LANG']['tl_team']['name'] = [
+    'Name',
+    'Name des Teams'
+];
+
+$GLOBALS['TL_LANG']['tl_team']['calendar'] = [
+    'Kalender',
+    'Kalender in dem die Spiele dieser Mansnchaft gespeichert werden.'
+];
+
 $GLOBALS['TL_LANG']['tl_team']['nu_id'] = [
     'ID des Teams',
     'TeamID, beispielsweise 1305278 für BZL M in der Saison 19/20.'   //FIXME

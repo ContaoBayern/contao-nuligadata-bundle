@@ -13,3 +13,12 @@ services:
         arguments:
             - '@service_container'
         public: true
+
+    ContaoBayern\NuligadataBundle\Controller\ContentElement\NuligadataTableController:
+        tags:
+            -
+                name: contao.content_element
+                category: nuligadata
+                renderer: esi
+                ### method: getCustomResponse
+                ### type: my_custom_type

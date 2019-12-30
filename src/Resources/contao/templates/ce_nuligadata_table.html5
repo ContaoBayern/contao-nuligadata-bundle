@@ -1,0 +1,64 @@
+<div class="nuligadata-table-element">
+    <?php if ($this->tablerows): ?>
+    <h2><?= $this->teamModel->name; ?></h2>
+    <table class="nuLiga-table">
+        <thead>
+        <tr>
+            <th>Platz</th>
+            <th>Mannschaft</th>
+            <th>Spiele</th>
+            <th>S</th>
+            <th>U</th>
+            <th>N</th>
+            <th>Tore</th>
+            <th>+/−</th>
+            <th>Punkte</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach($this->tablerows as $row): ?>
+        <tr>
+            <td><?=$row['tableRank'] ?></td>
+            <td><?=$row['team'] ?></td>
+            <td><?=$row['meetings'] ?></td>
+            <td><?=$row['ownMeetings'] ?></td>
+            <td><?=$row['tieMeetings'] ?></td>
+            <td><?=$row['otherMeetings'] ?></td>
+            <td><?=$row['ownMatches'] ?>:<?=$row['otherMatches'] ?></td>
+            <td><?=($row['ownMatches'] - $row['otherMatches'])>0 ? '+' : '−' ?><?=abs($row['ownMatches'] - $row['otherMatches']) ?></td>
+            <td><?=$row['ownPoints'] ?>:<?=$row['otherPoints'] ?></td>
+
+        </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php endif; ?>
+</div>
+
+<style>
+    table.nuLiga-table {
+        border-collapse: collapse;
+        border: 1px solid #666666;
+        font-family: sans-serif;
+    }
+    table.nuLiga-table tr {
+        border: 1px solid #999;
+    }
+    table.nuLiga-table thead {
+        color: white;
+        background-color: #999;
+    }
+    table.nuLiga-table th,
+    table.nuLiga-table td
+    {
+        text-align: left;
+        padding: .25em .5em .25em .5em;
+    }
+    table.nuLiga-table th:nth-of-type(8) {
+        text-align: center;
+    }
+    table.nuLiga-table td:nth-of-type(8) {
+        text-align: right;
+    }
+</style>

@@ -43,6 +43,29 @@ CLUBNR='12345'
 $CONTAO_CONSOLE $COMMAND $VERBAND $SAISON $CLUBNR all
 ```
 
+Nach dem ersten API-Abruf der Mannschaften (Teams) der angegebenen Saison muss in den
+Einstellungen jedes Teams der Kalender angegeben werden, in dem die Spiele dieses
+Teams bei folgenden API-Abrufen als Event eingetragen werden sollen. Die Daten zur aktuellen 
+Tabelle werden direkt im Team gespeichert. 
+
+
 ### Inhaltselemente und Kalender-Events
 
-FIXME
+#### Content Element Ergebnistabelle
+
+Das Content Element Ergebnistabelle stellt die Tabelle zu einer ausgewählten Mannschaft 
+(siehe Backend Modul "Teams") dar, die aus der nuLiga API geholt wurde. Es wird immer die 
+aktuellste Tabelle gespeichert und dargestellt. Die Daten der Tabelle werden im Team 
+(`tl_team.json_data`) gespeichert. Die Ausgabe kann über das Template 
+`ce_nuligadata_table.html5` angepasst werden.
+
+
+#### Calendar Events
+
+Die Zuordnung von Spielen einer Mannschaft zu einem Kalender erfolgt über die Einstellung im Team. 
+Hier muss ein Kalender ausgewähl sein, damit Spiel-Termine in diesem Kalender gespeichert werden.
+ 
+Bei Events, die Daten zu Spielen enthalten werden die speziellen Felder der Palette "nuLiga"
+gefüllt. Diese Daten können im (Kalender- oder Detail-) Template verwendet werden.
+Tipp: die zur Verfügung stehehnden Variablen können durch Einfügen von `<?php $this->dumpTemplateVars(); ?>`
+in das Tempalte eingesehen werden.

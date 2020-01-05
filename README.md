@@ -71,4 +71,4 @@ Hier muss ein Kalender ausgewählt sein, damit Spiel-Termine in diesem Kalender 
 Bei Events, die Daten zu Spielen enthalten, werden die speziellen Felder der Palette "nuLiga"
 gefüllt. Diese Daten können im (Kalender- oder Detail-) Template verwendet werden.
 Tipp: die zur Verfügung stehenden Variablen können durch Einfügen von `<?php $this->dumpTemplateVars(); ?>`
-in das Tempalte eingesehen werden.
+in das Template eingesehen werden.

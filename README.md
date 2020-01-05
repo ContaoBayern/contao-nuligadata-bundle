@@ -6,7 +6,7 @@ Contao Kalender zu erzeugen.
 
 ## Konfiguration
 
-In der `parameters.yml` der Contao-Inatallation müssen die Zugangsdaten für die API hinterlegt werden:
+In der `parameters.yml` der Contao-Installation müssen die Zugangsdaten für die API hinterlegt werden:
 
 ```
     nuPortalRSHost: 'https://example-portal.liga.nu'

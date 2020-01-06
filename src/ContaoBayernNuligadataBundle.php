@@ -5,7 +5,7 @@ namespace ContaoBayern\NuligadataBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * Configures the Ligaverwaltung bundle.
+ * Configures the Nuligadata bundle.
  *
  * @author Andreas Fieger
  */

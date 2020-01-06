@@ -112,7 +112,9 @@ class AuthenticatedRequest
                 $cacheItem = $appCache->getItem($key);
                 if ($cacheItem->isHit()) {
                     $this->tokens[$key] = $cacheItem->get();
-                    $this->logger->addDebug("hole gecachten Wert '$key': ".$this->tokens[$key]);
+                    // $this->logger->addDebug("hole gecachten Wert '$key': ".$this->tokens[$key],
+                    //     [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
+                    // );
                 }
             }
         } catch (InvalidArgumentException $e) {
@@ -164,7 +166,10 @@ class AuthenticatedRequest
         if ($this->lastStatus === 200 &&
             time() - $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] < 30 // 30 Sekunden
         ) {
-            $this->logger->addDebug("token sollte noch gültig sein: keine erneute authentifizierung");
+            // $this->logger->addDebug("token sollte noch gültig sein: keine erneute authentifizierung",
+            //     [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
+            // );
+
             return true;
         }
         $this->lastStatus = 0;

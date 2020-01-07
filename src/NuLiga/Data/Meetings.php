@@ -4,8 +4,10 @@ namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
+use Contao\Date;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
+use Ausi\SlugGenerator\SlugGenerator;
 
 class Meetings extends BaseDataHandler
 {
@@ -58,6 +60,8 @@ class Meetings extends BaseDataHandler
             return;
         }
 
+        $slugGenerator = new SlugGenerator();
+
         foreach ($meetings as $i => $meeting) {
             // $ourTeamId = 0;
             $ourTeam = null;
@@ -84,10 +88,21 @@ class Meetings extends BaseDataHandler
             $timestamp = strtotime($meeting['scheduled']); // TODO: vs 'originalDate' vs 'endDate' UND UTC vs local time?
 
             $event = CalendarEventsModel::findBy(['meetingUuid=?'], [$meeting['meetingUuid']]);
-            // tl_calendar_event-Felder des Bundles
+
+            $alias = $event->alias = $slugGenerator->generate(sprintf('%s_%s-%s',
+                Date::parse('Y-m-d', $timestamp),
+                $meeting['teamHome'],
+                $meeting['teamGuest']
+            ));
+
             if (null === $event) {
                 $event = new CalendarEventsModel();
                 $event->meetingUuid = $meeting['meetingUuid'];
+                $event->alias = $alias;
+            }
+            // Bei verschobenen Spielen ändert sich das Datum und damit der alias
+            if ($event->alias !== $alias) {
+                $event->alias = $alias;
             }
             $event->teamHome = $meeting['teamHome'];
             $event->teamGuest = $meeting['teamGuest'];

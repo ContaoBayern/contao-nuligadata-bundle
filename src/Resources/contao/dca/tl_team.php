@@ -143,7 +143,7 @@ $GLOBALS['TL_DCA']['tl_team'] = [
         'json_data' => [
             'inputType' => 'jsonWidget',
             'label'     => &$GLOBALS['TL_LANG']['tl_team']['json_data'],
-            'eval'      => ['tl_style'=>'long', 'decodeEntities'=>true, 'allowHtml'=>true],
+            'eval'      => ['tl_style'=>'long', 'decodeEntities'=>true, 'allowHtml'=>true,'readonly' => true],
             'sql'       => "blob NULL",
         ],
 

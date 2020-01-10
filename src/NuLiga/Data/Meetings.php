@@ -4,7 +4,6 @@ namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
-use Contao\Date;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 use Ausi\SlugGenerator\SlugGenerator;
@@ -89,8 +88,9 @@ class Meetings extends BaseDataHandler
 
             $event = CalendarEventsModel::findBy(['meetingUuid=?'], [$meeting['meetingUuid']]);
 
-            $alias = $event->alias = $slugGenerator->generate(sprintf('%s_%s-%s',
-                Date::parse('Y-m-d', $timestamp),
+            $alias = $slugGenerator->generate(sprintf('%s-%s_%s-%s',
+                $meeting['leagueNickname'],
+                $meeting['seasonNickname'],
                 $meeting['teamHome'],
                 $meeting['teamGuest']
             ));

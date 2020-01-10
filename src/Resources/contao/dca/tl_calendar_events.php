@@ -1,7 +1,7 @@
 <?php
 
 $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default']
-    .= ';{nuLiga_legend},team,roundName,homeaway,courtHallName,teamHome,teamGuest,matchesHome,matchesGuest,meetingUuid,tstamp';
+    .= ';{nuLiga_legend},team,roundName,homeaway,courtHallName,teamHome,teamGuest,matchesHome,matchesGuest,meetingUuid,tstamp,json_data';
 
 // TODO: das 'team' sollte eigentlich ein Attribut des tl_calendar sein (-> pid dieses tl_calendar_events)
 
@@ -40,6 +40,15 @@ foreach ([
         'sql'       => "varchar(128) NOT NULL default ''",
     ];
 }
+
+$GLOBALS['TL_DCA']['tl_calendar_events']['fields']['json_data'] = [
+    'inputType' => 'jsonWidget',
+    'label'     => &$GLOBALS['TL_LANG']['tl_calendar_events']['json_data'],
+    'eval'      => ['tl_style'=>'long', 'decodeEntities'=>true, 'allowHtml'=>true,'readonly' => true],
+    'sql'       => "blob NULL",
+];
+
+
 
 // Show the time stamp (which is the date when we last fetched data)
 $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['tstamp']['label'] = &$GLOBALS['TL_LANG']['tl_calendar_events']['tstamp'];

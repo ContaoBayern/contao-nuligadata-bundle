@@ -111,6 +111,7 @@ class Meetings extends BaseDataHandler
             $event->matchesHome = $meeting['matchesHome'];
             $event->matchesGuest = $meeting['matchesGuest'];
             $event->roundName = $meeting['roundName'];
+            $event->json_data = json_encode($meeting);
 
             // Standard tl_calendar_event-Felder
             $event->pid = $ourTeam->calendar;

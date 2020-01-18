@@ -11,7 +11,7 @@ use ContaoBayern\NuligadataBundle\NuLiga\Data\Meetings;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Table;
 use ContaoBayern\NuligadataBundle\NuLiga\Data\Teams;
 use ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,11 +21,28 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 
-class AccessApiCommand extends Command implements FrameworkAwareInterface, ContainerAwareInterface
+class AccessApiCommand extends Command implements FrameworkAwareInterface
 {
 
     use FrameworkAwareTrait;
-    use ContainerAwareTrait;
+
+    /**
+     * @var AuthenticatedRequest
+     */
+    protected $nuApiRequest;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    public function __construct(AuthenticatedRequest $nuApiRequest, LoggerInterface $logger)
+    {
+        parent::__construct();
+
+        $this->nuApiRequest = $nuApiRequest;
+        $this->logger = $logger;
+    }
 
     /**
      * {@inheritdoc}
@@ -59,35 +76,29 @@ class AccessApiCommand extends Command implements FrameworkAwareInterface, Conta
                 throw new InvalidParameterException('gültige Werte für action sind teams|meetings|table');
             }
 
-            /** @var AuthenticatedRequest $nuApiRequest */
-            $nuApiRequest = $this->container->get('nuliga.authenticated.request');
-
-            /** @var Logger $logger */
-            $logger = System::getContainer()->get('monolog.logger.contao');
-
-            //$logger->addInfo('Aktualisiere Daten über die nuLiga API',
+            //$this->logger->addInfo('Aktualisiere Daten über die nuLiga API',
             //    ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
             //);
 
-            if (!$nuApiRequest->authenticate()) {
-                $logger->addError('konnte nicht bei der nuLiga API authentifizieren',
+            if (!$this->nuApiRequest->authenticate()) {
+                $this->logger->addError('konnte nicht bei der nuLiga API authentifizieren',
                     ['contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]
                 );
                 throw new RuntimeException('konnte nicht authentifizieren');
             }
 
             if (in_array($action, ['all', 'teams'])) {
-                $teams = new Teams($nuApiRequest, $logger);
+                $teams = new Teams($this->nuApiRequest, $this->logger);
                 $teams->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
             if (in_array($action, ['all', 'meetings'])) {
-                $meetings = new Meetings($nuApiRequest, $logger);
+                $meetings = new Meetings($this->nuApiRequest, $this->logger);
                 $meetings->getAndStoreData($fedNickname, $seasonNickname, $clubNr);
             }
 
             if (in_array($action, ['all', 'table'])) {
-                $table = new Table($nuApiRequest, $logger);
+                $table = new Table($this->nuApiRequest, $this->logger);
                 $teams = TeamModel::findBy('nu_season', $seasonNickname);
                 if ($teams) {
                     /** @var TeamModel $team */

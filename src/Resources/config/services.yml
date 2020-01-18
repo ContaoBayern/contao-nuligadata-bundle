@@ -1,17 +1,28 @@
 services:
 
+    _instanceof:
+        Contao\CoreBundle\Framework\FrameworkAwareInterface:
+            calls:
+                - ['setFramework', ['@contao.framework']]
+
+        Symfony\Component\DependencyInjection\ContainerAwareInterface:
+            calls:
+                - ['setContainer', ['@service_container']]
+
     app.apiaccess.command:
         class: ContaoBayern\NuligadataBundle\Command\AccessApiCommand
+        arguments:
+            - '@nuliga.authenticated.request'
+            - '@monolog.logger.contao'
         public: true
         tags: ['console.command']
-        calls:
-          - ["setFramework", ["@contao.framework"]]
-          - ["setContainer", ["@service_container"]]
 
     nuliga.authenticated.request:
         class: ContaoBayern\NuligadataBundle\NuLiga\Request\AuthenticatedRequest
         arguments:
             - '@service_container'
+            - '@cache.app'
+            - '@monolog.logger.contao'
         public: true
 
     ContaoBayern\NuligadataBundle\Controller\ContentElement\NuligadataTableController:

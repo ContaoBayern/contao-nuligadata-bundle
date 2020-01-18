@@ -11,7 +11,7 @@ use Psr\Cache\InvalidArgumentException;
 use Monolog\Logger;
 use Psr\Log\LogLevel;
 use RuntimeException;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class AuthenticatedRequest
@@ -66,9 +66,16 @@ class AuthenticatedRequest
      */
     protected $logger;
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * @var FilesystemAdapter
+     */
+    protected $appCache;
+
+    public function __construct(ContainerInterface $container, AdapterInterface $cache, Logger $logger)
     {
         $this->container = $container;
+        $this->appCache = $cache;
+        $this->logger = $logger;
 
         $this->tokens = [
             self::NU_ACCESS_TOKEN_KEY    => null,
@@ -81,8 +88,6 @@ class AuthenticatedRequest
             self::PARAM_NU_CLIENT_SECRET  => null,
             self::PARAM_NU_PORTAL_RS_HOST => null,
         ];
-
-        $this->logger = $this->container->get('monolog.logger.contao');
 
         $this->getCachedTokenValues();
 
@@ -101,15 +106,12 @@ class AuthenticatedRequest
     protected function getCachedTokenValues()
     {
         try {
-            /** @var $appCache FilesystemAdapter */
-            $appCache = $this->container->get('cache.app');
-
             foreach ([
                          self::NU_ACCESS_TOKEN_KEY,
                          self::NU_REFRESH_TOKEN_KEY,
                          self::NU_TOKEN_TIMESTAMP_KEY,
                      ] as $key) {
-                $cacheItem = $appCache->getItem($key);
+                $cacheItem = $this->appCache->getItem($key);
                 if ($cacheItem->isHit()) {
                     $this->tokens[$key] = $cacheItem->get();
                     // $this->logger->addDebug("hole gecachten Wert '$key': ".$this->tokens[$key],
@@ -289,18 +291,15 @@ class AuthenticatedRequest
         $this->tokens[self::NU_REFRESH_TOKEN_KEY] = $tokens['refresh_token'];
         $this->tokens[self::NU_TOKEN_TIMESTAMP_KEY] = time();
 
-        /** @var $appCache FilesystemAdapter */
-        $appCache = $this->container->get('cache.app');
-
         try {
             foreach ([
                          self::NU_ACCESS_TOKEN_KEY,
                          self::NU_REFRESH_TOKEN_KEY,
                          self::NU_TOKEN_TIMESTAMP_KEY,
                      ] as $key) {
-                $cacheItem = $appCache->getItem($key);
+                $cacheItem = $this->appCache->getItem($key);
                 $cacheItem->set($this->tokens[$key]);
-                $appCache->save($cacheItem);
+                $this->appCache->save($cacheItem);
             }
         } catch (InvalidArgumentException $e) {
             $this->logger->addError($e->getMessage(), [ 'contao' => new ContaoContext(__METHOD__, ContaoContext::ERROR)]);

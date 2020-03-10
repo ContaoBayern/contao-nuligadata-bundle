@@ -19,7 +19,7 @@ $GLOBALS['TL_LANG']['tl_team']['name'] = [
 
 $GLOBALS['TL_LANG']['tl_team']['calendar'] = [
     'Kalender',
-    'Kalender in dem die Spiele dieser Mansnchaft gespeichert werden.'
+    'Kalender in dem die Spiele dieser Mannschaft gespeichert werden.'
 ];
 
 $GLOBALS['TL_LANG']['tl_team']['nu_id'] = [
@@ -29,7 +29,7 @@ $GLOBALS['TL_LANG']['tl_team']['nu_id'] = [
 
 $GLOBALS['TL_LANG']['tl_team']['nu_name'] = [
     'Datensatzbezeichnung',
-    'HS Bin nicht sicher, welche Daten wir hier holen. Könnte hier nicht auch nu_team ausgegeben werden?'   //FIXME
+    'Datensatzbezeichnung, z.B. weibl. D-Jugend'
 ];
 
 $GLOBALS['TL_LANG']['tl_team']['nu_team'] = [

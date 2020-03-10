@@ -2,5 +2,6 @@
  * Backend Styles for "nuLiga API access bundle" Bundle
  */
 #tl_navigation .group-nu_liga {
-    background: url(logo.svg) 3px 2px no-repeat;
+    /*background: url(logo.svg) 3px 2px no-repeat;*/
+    background: url(Handball-pictogram.svg) 3px 2px no-repeat; /* alternative Icon */
 }

@@ -29,7 +29,7 @@ $GLOBALS['TL_LANG']['tl_team']['nu_id'] = [
 
 $GLOBALS['TL_LANG']['tl_team']['nu_name'] = [
     'Datensatzbezeichnung',
-    'Datensatzbezeichnung, z.B. weibl. D-Jugend'
+    'Datensatzbezeichnung, z.B. "weibl. D-Jugend"'
 ];
 
 $GLOBALS['TL_LANG']['tl_team']['nu_team'] = [
@@ -39,7 +39,7 @@ $GLOBALS['TL_LANG']['tl_team']['nu_team'] = [
 
 $GLOBALS['TL_LANG']['tl_team']['nu_group'] = [
     'Liga bzw. Staffel',
-    'Liga- bzw. Staffelbezeichnung, beispielsweise "Bezirksliga Frauen Staffel 1".'
+    'ID der Liga- bzw. Staffel.'
 ];
 
 $GLOBALS['TL_LANG']['tl_team']['nu_season'] = [

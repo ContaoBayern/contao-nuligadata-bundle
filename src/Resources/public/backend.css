@@ -3,5 +3,6 @@
  */
 #tl_navigation .group-nu_liga {
     /*background: url(logo.svg) 3px 2px no-repeat;*/
-    background: url(Handball_pictogram.svg) 3px 2px no-repeat; /* alternative Icon */
+    background: url(Handball_pictogram.svg) 3px 2px no-repeat;
+    background-size: 20px;/* alternative Icon */
 }

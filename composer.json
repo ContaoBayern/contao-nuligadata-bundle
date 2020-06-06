@@ -7,11 +7,14 @@
     {
       "name": "Andreas Fieger",
       "email": "dev@andreas-fieger.de",
-      "role": "Developer"
+      "role": "Developer",
+      "homepage": "https://github.com/fiedsch"
     },
     {
       "name": "Hella Schuster",
-      "role": "Developer"
+      "email": "hella@hellawebdesign.de",
+      "role": "Developer",
+      "homepage": "https://github.com/hella-schu"
     }
   ],
   "support": {

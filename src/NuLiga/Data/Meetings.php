@@ -106,7 +106,7 @@ class Meetings extends BaseDataHandler
             }
             $event->teamHome = $meeting['teamHome'];
             $event->teamGuest = $meeting['teamGuest'];
-            $event->courtHallName = $meeting['courtHallName'];
+            $event->courtHallName = $meeting['courtHallName'] ?? 'nicht angegeben/noch nicht festgelegt'; // courtHallName might be null in the API response but we defined the column to be NOT NULL ?
             $event->homeaway = $meeting['homeaway'];
             $event->matchesHome = $meeting['matchesHome'];
             $event->matchesGuest = $meeting['matchesGuest'];

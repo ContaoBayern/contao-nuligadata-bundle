@@ -106,7 +106,7 @@ class Meetings extends BaseDataHandler
             }
             $event->teamHome = $meeting['teamHome'];
             $event->teamGuest = $meeting['teamGuest'];
-            $event->courtHallName = $meeting['courtHallName'] ?? 'nicht angegeben/noch nicht festgelegt'; // courtHallName might be null in the API response but we defined the column to be NOT NULL ?
+            $event->courtHallName = $meeting['courtHallName'] ?? 'nicht angegeben/noch nicht festgelegt'; // courtHallName might be null in the API response but we defined the column to be NOT NULL
             $event->homeaway = $meeting['homeaway'];
             $event->matchesHome = $meeting['matchesHome'];
             $event->matchesGuest = $meeting['matchesGuest'];
@@ -122,7 +122,7 @@ class Meetings extends BaseDataHandler
             $event->addTime = true;
             $event->startTime = $timestamp;
             $event->endTime = $timestamp;
-            $event->location = $meeting['courtHallName'];
+            $event->location = $meeting['courtHallName'] ?? 'nicht angegeben/noch nicht festgelegt'; // courtHallName might be null in the API response but we defined the column to be NOT NULL
             $event->title = sprintf('%s : %s', $meeting['teamHome'], $meeting['teamGuest']);
 
             $event->save();

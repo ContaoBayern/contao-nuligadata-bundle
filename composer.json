@@ -26,7 +26,7 @@
     "ext-json": "*",
     "contao/core-bundle": "^4.4",
     "contao/calendar-bundle": "^4.4",
-    "fiedsch/contao-jsonwidget": "^0.3.0",
+    "fiedsch/contao-jsonwidget": "^0.4",
     "guzzlehttp/guzzle": "^6.5"
   },
   "autoload": {

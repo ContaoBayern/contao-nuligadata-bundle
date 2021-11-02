@@ -4,6 +4,7 @@ namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
+use Contao\Database;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 use Ausi\SlugGenerator\SlugGenerator;
@@ -22,6 +23,7 @@ class Meetings extends BaseDataHandler
     {
         $data = $this->getData($fedNickname, $seasonNickname, $clubNr);
         if (isset($data['meetingAbbr']) && is_array($data['meetingAbbr'])) {
+            $this->deleteUpcomingMeetings($seasonNickname);
             $this->storeData($data, $clubNr);
         }
     }
@@ -131,6 +133,25 @@ class Meetings extends BaseDataHandler
         $this->logger->addError('nuliga:apiaccess "meetings" synchronisiert',
             ['contao' => new ContaoContext(__METHOD__, ContaoContext::CRON)]
         );
+    }
+
+    /**
+     * Spiele, die noch nicht stattgefunden haben löschen, damit sie bei einem erneuten Import neu angelegt
+     * werden können oder entfallen, falls (z.B.) das Spiel abgesagt wurde.
+     */
+    protected function deleteUpcomingMeetings(string $seasonNickname): void
+    {
+        $teams = TeamModel::findBy('nu_season', $seasonNickname);
+        if (!$teams) {
+            return;
+        }
+        $teamCalendarIds = [];
+        /** @var TeamModel $team */
+        foreach ($teams as $team) {
+            $teamCalendarIds[] = $team->calendar;
+        }
+        $query = 'DELETE FROM tl_calendar_events WHERE pid IN ('.implode(',', array_unique($teamCalendarIds)).') AND startTime>?';
+        Database::getInstance()->prepare($query)->execute([time()]);
     }
 
 }

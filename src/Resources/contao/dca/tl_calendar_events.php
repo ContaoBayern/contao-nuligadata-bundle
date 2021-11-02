@@ -3,15 +3,15 @@
 $GLOBALS['TL_DCA']['tl_calendar_events']['palettes']['default']
     .= ';{nuLiga_legend},team,roundName,homeaway,courtHallName,teamHome,teamGuest,matchesHome,matchesGuest,meetingUuid,tstamp,json_data';
 
-// TODO: das 'team' sollte eigentlich ein Attribut des tl_calendar sein (-> pid dieses tl_calendar_events)
-
-$GLOBALS['TL_DCA']['tl_calendar_events']['fields']['team'] = [
-    'label'      => &$GLOBALS['TL_LANG']['tl_calendar_events']['team'],
-    'inputType'  => 'select',
-    'eval'       => ['readonly' => true, 'mandatory' => false, 'tl_class' => 'w50'],
-    'foreignKey' => 'tl_team.nu_name',
-    'sql'        => "int(10) NOT NULL default '0'",
-];
+// // TODO: das 'team' sollte eigentlich ein Attribut des tl_calendar sein (-> pid dieses tl_calendar_events)
+//
+// $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['team'] = [
+//     'label'      => &$GLOBALS['TL_LANG']['tl_calendar_events']['team'],
+//     'inputType'  => 'select',
+//     'eval'       => ['readonly' => true, 'mandatory' => false, 'tl_class' => 'w50'],
+//     'foreignKey' => 'tl_team.nu_name',
+//     'sql'        => "int(10) NOT NULL default '0'",
+// ];
 
 $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['homeaway'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_calendar_events']['homeaway'],

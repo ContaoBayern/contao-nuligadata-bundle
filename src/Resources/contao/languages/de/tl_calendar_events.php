@@ -13,10 +13,10 @@ $GLOBALS['TL_LANG']['tl_calendar_events']['away'] = 'Auswärtsspiel';
 $GLOBALS['TL_LANG']['tl_calendar_events']['nuLiga_legend'] = 'nuLiga';
 
 
-$GLOBALS['TL_LANG']['tl_calendar_events']['team'] = [
-    'Mannschaft',
-    'Name der Mannschaft (Daten aus nuLiga)'
-];
+//$GLOBALS['TL_LANG']['tl_calendar_events']['team'] = [
+//    'Mannschaft',
+//    'Name der Mannschaft (Daten aus nuLiga)'
+//];
 $GLOBALS['TL_LANG']['tl_calendar_events']['roundName'] = [
     'Runde',
     'Name der Runde (Daten aus nuLiga)'

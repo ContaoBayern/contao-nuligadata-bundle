@@ -26,7 +26,7 @@
             <td><?=$row['tieMeetings'] ?></td>
             <td><?=$row['otherMeetings'] ?></td>
             <td><?=$row['ownMatches'] ?>:<?=$row['otherMatches'] ?></td>
-            <td><?=($row['ownMatches'] - $row['otherMatches'])>0 ? '+' : '−' ?><?=abs($row['ownMatches'] - $row['otherMatches']) ?></td>
+            <td><?=($row['ownMatches'] - $row['otherMatches'])>0 ? '+' : (($row['ownMatches'] - $row['otherMatches'])<0 ? '-' : '' )?><?=abs($row['ownMatches'] - $row['otherMatches']) ?></td>
             <td><?=$row['ownPoints'] ?>:<?=$row['otherPoints'] ?></td>
 
         </tr>

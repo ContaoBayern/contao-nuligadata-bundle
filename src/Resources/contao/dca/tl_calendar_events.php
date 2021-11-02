@@ -44,7 +44,7 @@ foreach ([
 $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['json_data'] = [
     'inputType' => 'jsonWidget',
     'label'     => &$GLOBALS['TL_LANG']['tl_calendar_events']['json_data'],
-    'eval'      => ['tl_style'=>'long', 'decodeEntities'=>true, 'allowHtml'=>true,'readonly' => true],
+    'eval'      => ['tl_class'=>'long clr', 'decodeEntities'=>true, 'allowHtml'=>false,'readonly' => true],
     'sql'       => "blob NULL",
 ];
 

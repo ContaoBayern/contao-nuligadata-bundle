@@ -20,7 +20,7 @@ $GLOBALS['TL_DCA']['tl_calendar_events']['fields']['homeaway'] = [
         0 => &$GLOBALS['TL_LANG']['tl_calendar_events']['away'],
         1 => &$GLOBALS['TL_LANG']['tl_calendar_events']['home'],
     ],
-    'eval'      => ['isAssociative' => true, 'readonly' => true, 'tl_class' => 'w50'],
+    'eval'      => ['isAssociative' => true, 'readonly' => true, 'tl_class' => 'w50 clr'],
     'sql'       => "int(10) unsigned NOT NULL default '0'",
 ];
 

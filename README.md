@@ -14,6 +14,19 @@ In der `parameters.yml` der Contao-Installation müssen die Zugangsdaten für di
     nuClientSecret: '**********'
 ```
 
+Neben den Zugangsdaten für die nuLiga API kann auch das Verhalten beim Datenabruf konfiguriert 
+werden. Mit 
+
+```
+    app.importData.deleteUcomingEvents: false
+```
+
+kann gesteuert werden, daß `ContaoBayern\NuligadataBundle\NuLiga\Data\Meetings::deleteUpcomingMeetings()` 
+nicht aufgerufen wird. Damit werden Begegnungen, deren Spieldatum in der Zukunft liegt, vor einem Import
+nicht gelöscht. Dies kann zu Duplikaten führen (falls sich die `meetingUuid` der Begegnung -- warum auch 
+immer -- geändert hat). Sinnvoll könnte diese Einstellung sein, wenn die Daten des erzeugten Events manuell 
+erweitert wurden und diese Änderungen nicht verloren gehen sollen.
+
 
 ## Verwendung
 

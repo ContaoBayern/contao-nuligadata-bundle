@@ -5,6 +5,7 @@ namespace ContaoBayern\NuligadataBundle\NuLiga\Data;
 use Contao\CalendarEventsModel;
 use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\Database;
+use Contao\System;
 use ContaoBayern\NuligadataBundle\Models\TeamModel;
 use RuntimeException;
 use Ausi\SlugGenerator\SlugGenerator;
@@ -23,7 +24,13 @@ class Meetings extends BaseDataHandler
     {
         $data = $this->getData($fedNickname, $seasonNickname, $clubNr);
         if (isset($data['meetingAbbr']) && is_array($data['meetingAbbr'])) {
-            $this->deleteUpcomingMeetings($seasonNickname);
+            $container = System::getContainer();
+            $doDeleteUpcomingMeetings = $container->hasParameter('app.importData.deleteUcomingEvents') ? $container->getParameter('app.importData.deleteUcomingEvents') : true;
+            if ($doDeleteUpcomingMeetings) {
+                $this->deleteUpcomingMeetings($seasonNickname);
+            } else {
+                $this->logger->debug('Überspringe deleteUpcomingMeetings(), da app.importData.deleteUcomingEvents: false in parameters.yml gesetzt ist');
+            }
             $this->storeData($data, $clubNr);
         }
     }

@@ -1,33 +1,38 @@
+<?php 
+ // eigenes Team eintragen: 
+ $myteam = 'TSV Forstenried';
+ ?>
+
 <div class="nuligadata-table-element">
     <?php if ($this->tablerows): ?>
-    <h2><?= $this->teamModel->name; ?></h2>
-    <table class="nuLiga-table">
+<h2>Tabelle <?= $this->teamModel->name; ?></h2>
+    <table class="nuliga-table">
         <thead>
         <tr>
-            <th>Platz</th>
-            <th>Mannschaft</th>
-            <th>Spiele</th>
-            <th>S</th>
-            <th>U</th>
-            <th>N</th>
-            <th>Tore</th>
-            <th>+/−</th>
-            <th>Punkte</th>
+            <th scope="col">Platz</th>
+            <th scope="col">Mannschaft</th>
+            <th scope="col">Spiele</th>
+            <th scope="col">S</th>
+            <th scope="col">U</th>
+            <th scope="col">N</th>
+            <th scope="col">Tore</th>
+            <th scope="col">+/−</th>
+            <th scope="col">Punkte</th>
 
         </tr>
         </thead>
         <tbody>
         <?php foreach($this->tablerows as $row): ?>
-        <tr>
-            <td><?=$row['tableRank'] ?></td>
-            <td><?=$row['team'] ?></td>
-            <td><?=$row['meetings'] ?></td>
-            <td><?=$row['ownMeetings'] ?></td>
-            <td><?=$row['tieMeetings'] ?></td>
-            <td><?=$row['otherMeetings'] ?></td>
-            <td><?=$row['ownMatches'] ?>:<?=$row['otherMatches'] ?></td>
-            <td><?=($row['ownMatches'] - $row['otherMatches'])>0 ? '+' : (($row['ownMatches'] - $row['otherMatches'])<0 ? '-' : '' )?><?=abs($row['ownMatches'] - $row['otherMatches']) ?></td>
-            <td><?=$row['ownPoints'] ?>:<?=$row['otherPoints'] ?></td>
+        <tr class="<?php if (str_starts_with($row['team'], $myteam)) {echo "highlight";}?>">
+            <td data-label="Platz" scope="row"><?=$row['tableRank'] ?></td>
+            <td data-label="Mannschaft"><?=$row['team'] ?></td> 
+            <td data-label="Spiele"><?=$row['meetings'] ?></td>
+            <td data-label="Siege"><?=$row['ownMeetings'] ?></td>
+            <td data-label="Unentschieden"><?=$row['tieMeetings'] ?></td>
+            <td data-label="Niederlagen"><?=$row['otherMeetings'] ?></td>
+            <td data-label="Tore"><?=$row['ownMatches'] ?>:<?=$row['otherMatches'] ?></td>
+            <td data-label="+/-"><?=($row['ownMatches'] - $row['otherMatches'])>0 ? '+' : '−' ?><?=abs($row['ownMatches'] - $row['otherMatches']) ?></td>
+            <td data-label="Punkte"><?=$row['ownPoints'] ?>:<?=$row['otherPoints'] ?></td>
 
         </tr>
         <?php endforeach; ?>
@@ -35,30 +40,3 @@
     </table>
     <?php endif; ?>
 </div>
-
-<style>
-    table.nuLiga-table {
-        border-collapse: collapse;
-        border: 1px solid #666666;
-        font-family: sans-serif;
-    }
-    table.nuLiga-table tr {
-        border: 1px solid #999;
-    }
-    table.nuLiga-table thead {
-        color: white;
-        background-color: #999;
-    }
-    table.nuLiga-table th,
-    table.nuLiga-table td
-    {
-        text-align: left;
-        padding: .25em .5em .25em .5em;
-    }
-    table.nuLiga-table th:nth-of-type(8) {
-        text-align: center;
-    }
-    table.nuLiga-table td:nth-of-type(8) {
-        text-align: right;
-    }
-</style>

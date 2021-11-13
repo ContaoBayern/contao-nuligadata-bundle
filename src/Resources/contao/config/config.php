@@ -30,3 +30,6 @@ $GLOBALS['TL_CTE']['nuligadata']['nuligadata_table'] = NuligadataTableController
 if (TL_MODE === 'BE') {
     $GLOBALS['TL_CSS'][] = 'bundles/contaobayernnuligadata/backend.css';
 }
+
+/* Add to Frontend CSS */
+$GLOBALS['TL_CSS'][] = 'bundles/contaobayernnuligadata/nuliga.css';
